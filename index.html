@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Name Formatter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 0;
+      color: rgb(27, 28, 65);
+    }
+
+    label,
+    input,
+    button {
+      margin: 10px 0;
+      display: block;
+      height: 25px;
+      color: rgb(27, 28, 65);
+    }
+
+    input,
+    button {
+      border: 1px solid rgb(27, 28, 65);
+      border-radius: 12px;
+    }
+
+    button {
+      background-color: #dbedff;
+      box-shadow: 0 2px rgb(27, 28, 65);
+    }
+
+    button:hover {
+      background-color: #9ecfff;
+    }
+
+    button:active {
+      background-color: rgb(27, 28, 65);
+      color: #d1e8fe;
+      transform: translateY(2px);
+    }
+
+    #input {
+      width: 100%;
+      padding: 0 10px;
+      margin-right: 10px;
+
+      &:hover {
+        background-color: beige;
+      }
+    }
+
+    #inputLabel {
+      font-weight: bold;
+      margin-right: 10px;
+      color: rgb(27, 28, 65);
+    }
+
+    #goButton {
+      width: 100px;
+    }
+
+    #pasteButton,
+    #copyButton {
+      width: 200px;
+    }
+
+
+    #clipboardButtons {
+      display: ruby-text;
+    }
+
+    #container {
+      margin: auto auto;
+      padding: 25px;
+      background-color: #9ecfff;
+      border-radius: 12px;
+    }
+
+    #outputArea {
+      height: 200px;
+      border: 1px solid gray;
+      border-radius: 12px;
+      background-color: #d1e8fe;
+      padding: 10px;
+      width: calc(100% - 20px);
+    }
+
+    #inputContainer {
+      display: flex;
+      height: 50px;
+      vertical-align: middle;
+      align-items: baseline;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container">
+    <h1>Name Formatter</h1>
+    <div id="inputContainer">
+      <label id="inputLabel" for="input">Input:</label>
+      <input type="text" id="input" name="input">
+      <button id="goButton">Go</button>
+    </div>
+    <div id="outputArea"></div>
+    <div id="clipboardButtons">
+      <button id="copyButton">Copy to clipboard</button>
+      <button id="pasteButton">Run from clipboard</button>
+    </div>
+  </div>
+  <script src="bundle.js"></script>
+</body>
+
+</html>

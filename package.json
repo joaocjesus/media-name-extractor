@@ -1,0 +1,17 @@
+{
+  "name": "media-name-extractor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "browserify extract.js -o bundle.js",
+    "start": "open index.html"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "install": "^0.13.0",
+    "parse-torrent-name": "^0.5.4",
+    "prompt-sync": "^4.2.0"
+  }
+}
