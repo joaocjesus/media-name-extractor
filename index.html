@@ -101,6 +101,11 @@
       vertical-align: middle;
       align-items: baseline;
     }
+
+    #status {
+      height: 20px;
+      text-align: center;
+    }
   </style>
 </head>
 
@@ -115,8 +120,9 @@
     <div id="outputArea"></div>
     <div id="clipboardButtons">
       <button id="copyButton">Copy to clipboard</button>
-      <!-- <button id="pasteButton">Run from clipboard</button> -->
+      <button id="pasteButton">Run from clipboard</button>
     </div>
+    <div id="status"></div>
   </div>
   <script src="bundle.js"></script>
 </body>

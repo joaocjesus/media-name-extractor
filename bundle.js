@@ -1,820 +1,325 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
+// const ptn = require('parse-torrent-name');
+// const ptn = require('torrent-name-parser');
+const ptt = require("parse-torrent-title");
 
-'use strict';
+function getFormattedName(torrentInfo) {
+  const { title, year } = torrentInfo;
+  const yearStr = !!year ? `(${year})` : '';
+  return `${title} ${yearStr}`;
+}
 
-var R = typeof Reflect === 'object' ? Reflect : null
-var ReflectApply = R && typeof R.apply === 'function'
-  ? R.apply
-  : function ReflectApply(target, receiver, args) {
-    return Function.prototype.apply.call(target, receiver, args);
+function getOutput() {
+  return document.getElementById('outputArea').textContent;
+}
+
+function setStatus(text, error) {
+  document.getElementById('status').style = 'color: cornflowerblue';
+  if (error) {
+    document.getElementById('status').style = 'color: red';
   }
-
-var ReflectOwnKeys
-if (R && typeof R.ownKeys === 'function') {
-  ReflectOwnKeys = R.ownKeys
-} else if (Object.getOwnPropertySymbols) {
-  ReflectOwnKeys = function ReflectOwnKeys(target) {
-    return Object.getOwnPropertyNames(target)
-      .concat(Object.getOwnPropertySymbols(target));
-  };
-} else {
-  ReflectOwnKeys = function ReflectOwnKeys(target) {
-    return Object.getOwnPropertyNames(target);
-  };
-}
-
-function ProcessEmitWarning(warning) {
-  if (console && console.warn) console.warn(warning);
-}
-
-var NumberIsNaN = Number.isNaN || function NumberIsNaN(value) {
-  return value !== value;
-}
-
-function EventEmitter() {
-  EventEmitter.init.call(this);
-}
-module.exports = EventEmitter;
-module.exports.once = once;
-
-// Backwards-compat with node 0.10.x
-EventEmitter.EventEmitter = EventEmitter;
-
-EventEmitter.prototype._events = undefined;
-EventEmitter.prototype._eventsCount = 0;
-EventEmitter.prototype._maxListeners = undefined;
-
-// By default EventEmitters will print a warning if more than 10 listeners are
-// added to it. This is a useful default which helps finding memory leaks.
-var defaultMaxListeners = 10;
-
-function checkListener(listener) {
-  if (typeof listener !== 'function') {
-    throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
-  }
-}
-
-Object.defineProperty(EventEmitter, 'defaultMaxListeners', {
-  enumerable: true,
-  get: function() {
-    return defaultMaxListeners;
-  },
-  set: function(arg) {
-    if (typeof arg !== 'number' || arg < 0 || NumberIsNaN(arg)) {
-      throw new RangeError('The value of "defaultMaxListeners" is out of range. It must be a non-negative number. Received ' + arg + '.');
-    }
-    defaultMaxListeners = arg;
-  }
-});
-
-EventEmitter.init = function() {
-
-  if (this._events === undefined ||
-      this._events === Object.getPrototypeOf(this)._events) {
-    this._events = Object.create(null);
-    this._eventsCount = 0;
-  }
-
-  this._maxListeners = this._maxListeners || undefined;
-};
-
-// Obviously not all Emitters should be limited to 10. This function allows
-// that to be increased. Set to zero for unlimited.
-EventEmitter.prototype.setMaxListeners = function setMaxListeners(n) {
-  if (typeof n !== 'number' || n < 0 || NumberIsNaN(n)) {
-    throw new RangeError('The value of "n" is out of range. It must be a non-negative number. Received ' + n + '.');
-  }
-  this._maxListeners = n;
-  return this;
-};
-
-function _getMaxListeners(that) {
-  if (that._maxListeners === undefined)
-    return EventEmitter.defaultMaxListeners;
-  return that._maxListeners;
-}
-
-EventEmitter.prototype.getMaxListeners = function getMaxListeners() {
-  return _getMaxListeners(this);
-};
-
-EventEmitter.prototype.emit = function emit(type) {
-  var args = [];
-  for (var i = 1; i < arguments.length; i++) args.push(arguments[i]);
-  var doError = (type === 'error');
-
-  var events = this._events;
-  if (events !== undefined)
-    doError = (doError && events.error === undefined);
-  else if (!doError)
-    return false;
-
-  // If there is no 'error' event listener then throw.
-  if (doError) {
-    var er;
-    if (args.length > 0)
-      er = args[0];
-    if (er instanceof Error) {
-      // Note: The comments on the `throw` lines are intentional, they show
-      // up in Node's output if this results in an unhandled exception.
-      throw er; // Unhandled 'error' event
-    }
-    // At least give some kind of context to the user
-    var err = new Error('Unhandled error.' + (er ? ' (' + er.message + ')' : ''));
-    err.context = er;
-    throw err; // Unhandled 'error' event
-  }
-
-  var handler = events[type];
-
-  if (handler === undefined)
-    return false;
-
-  if (typeof handler === 'function') {
-    ReflectApply(handler, this, args);
-  } else {
-    var len = handler.length;
-    var listeners = arrayClone(handler, len);
-    for (var i = 0; i < len; ++i)
-      ReflectApply(listeners[i], this, args);
-  }
-
-  return true;
-};
-
-function _addListener(target, type, listener, prepend) {
-  var m;
-  var events;
-  var existing;
-
-  checkListener(listener);
-
-  events = target._events;
-  if (events === undefined) {
-    events = target._events = Object.create(null);
-    target._eventsCount = 0;
-  } else {
-    // To avoid recursion in the case that type === "newListener"! Before
-    // adding it to the listeners, first emit "newListener".
-    if (events.newListener !== undefined) {
-      target.emit('newListener', type,
-                  listener.listener ? listener.listener : listener);
-
-      // Re-assign `events` because a newListener handler could have caused the
-      // this._events to be assigned to a new object
-      events = target._events;
-    }
-    existing = events[type];
-  }
-
-  if (existing === undefined) {
-    // Optimize the case of one listener. Don't need the extra array object.
-    existing = events[type] = listener;
-    ++target._eventsCount;
-  } else {
-    if (typeof existing === 'function') {
-      // Adding the second element, need to change to array.
-      existing = events[type] =
-        prepend ? [listener, existing] : [existing, listener];
-      // If we've already got an array, just append.
-    } else if (prepend) {
-      existing.unshift(listener);
-    } else {
-      existing.push(listener);
-    }
-
-    // Check for listener leak
-    m = _getMaxListeners(target);
-    if (m > 0 && existing.length > m && !existing.warned) {
-      existing.warned = true;
-      // No error code for this since it is a Warning
-      // eslint-disable-next-line no-restricted-syntax
-      var w = new Error('Possible EventEmitter memory leak detected. ' +
-                          existing.length + ' ' + String(type) + ' listeners ' +
-                          'added. Use emitter.setMaxListeners() to ' +
-                          'increase limit');
-      w.name = 'MaxListenersExceededWarning';
-      w.emitter = target;
-      w.type = type;
-      w.count = existing.length;
-      ProcessEmitWarning(w);
-    }
-  }
-
-  return target;
-}
-
-EventEmitter.prototype.addListener = function addListener(type, listener) {
-  return _addListener(this, type, listener, false);
-};
-
-EventEmitter.prototype.on = EventEmitter.prototype.addListener;
-
-EventEmitter.prototype.prependListener =
-    function prependListener(type, listener) {
-      return _addListener(this, type, listener, true);
-    };
-
-function onceWrapper() {
-  if (!this.fired) {
-    this.target.removeListener(this.type, this.wrapFn);
-    this.fired = true;
-    if (arguments.length === 0)
-      return this.listener.call(this.target);
-    return this.listener.apply(this.target, arguments);
-  }
-}
-
-function _onceWrap(target, type, listener) {
-  var state = { fired: false, wrapFn: undefined, target: target, type: type, listener: listener };
-  var wrapped = onceWrapper.bind(state);
-  wrapped.listener = listener;
-  state.wrapFn = wrapped;
-  return wrapped;
-}
-
-EventEmitter.prototype.once = function once(type, listener) {
-  checkListener(listener);
-  this.on(type, _onceWrap(this, type, listener));
-  return this;
-};
-
-EventEmitter.prototype.prependOnceListener =
-    function prependOnceListener(type, listener) {
-      checkListener(listener);
-      this.prependListener(type, _onceWrap(this, type, listener));
-      return this;
-    };
-
-// Emits a 'removeListener' event if and only if the listener was removed.
-EventEmitter.prototype.removeListener =
-    function removeListener(type, listener) {
-      var list, events, position, i, originalListener;
-
-      checkListener(listener);
-
-      events = this._events;
-      if (events === undefined)
-        return this;
-
-      list = events[type];
-      if (list === undefined)
-        return this;
-
-      if (list === listener || list.listener === listener) {
-        if (--this._eventsCount === 0)
-          this._events = Object.create(null);
-        else {
-          delete events[type];
-          if (events.removeListener)
-            this.emit('removeListener', type, list.listener || listener);
-        }
-      } else if (typeof list !== 'function') {
-        position = -1;
-
-        for (i = list.length - 1; i >= 0; i--) {
-          if (list[i] === listener || list[i].listener === listener) {
-            originalListener = list[i].listener;
-            position = i;
-            break;
-          }
-        }
-
-        if (position < 0)
-          return this;
-
-        if (position === 0)
-          list.shift();
-        else {
-          spliceOne(list, position);
-        }
-
-        if (list.length === 1)
-          events[type] = list[0];
-
-        if (events.removeListener !== undefined)
-          this.emit('removeListener', type, originalListener || listener);
-      }
-
-      return this;
-    };
-
-EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
-
-EventEmitter.prototype.removeAllListeners =
-    function removeAllListeners(type) {
-      var listeners, events, i;
-
-      events = this._events;
-      if (events === undefined)
-        return this;
-
-      // not listening for removeListener, no need to emit
-      if (events.removeListener === undefined) {
-        if (arguments.length === 0) {
-          this._events = Object.create(null);
-          this._eventsCount = 0;
-        } else if (events[type] !== undefined) {
-          if (--this._eventsCount === 0)
-            this._events = Object.create(null);
-          else
-            delete events[type];
-        }
-        return this;
-      }
-
-      // emit removeListener for all listeners on all events
-      if (arguments.length === 0) {
-        var keys = Object.keys(events);
-        var key;
-        for (i = 0; i < keys.length; ++i) {
-          key = keys[i];
-          if (key === 'removeListener') continue;
-          this.removeAllListeners(key);
-        }
-        this.removeAllListeners('removeListener');
-        this._events = Object.create(null);
-        this._eventsCount = 0;
-        return this;
-      }
-
-      listeners = events[type];
-
-      if (typeof listeners === 'function') {
-        this.removeListener(type, listeners);
-      } else if (listeners !== undefined) {
-        // LIFO order
-        for (i = listeners.length - 1; i >= 0; i--) {
-          this.removeListener(type, listeners[i]);
-        }
-      }
-
-      return this;
-    };
-
-function _listeners(target, type, unwrap) {
-  var events = target._events;
-
-  if (events === undefined)
-    return [];
-
-  var evlistener = events[type];
-  if (evlistener === undefined)
-    return [];
-
-  if (typeof evlistener === 'function')
-    return unwrap ? [evlistener.listener || evlistener] : [evlistener];
-
-  return unwrap ?
-    unwrapListeners(evlistener) : arrayClone(evlistener, evlistener.length);
-}
-
-EventEmitter.prototype.listeners = function listeners(type) {
-  return _listeners(this, type, true);
-};
-
-EventEmitter.prototype.rawListeners = function rawListeners(type) {
-  return _listeners(this, type, false);
-};
-
-EventEmitter.listenerCount = function(emitter, type) {
-  if (typeof emitter.listenerCount === 'function') {
-    return emitter.listenerCount(type);
-  } else {
-    return listenerCount.call(emitter, type);
-  }
-};
-
-EventEmitter.prototype.listenerCount = listenerCount;
-function listenerCount(type) {
-  var events = this._events;
-
-  if (events !== undefined) {
-    var evlistener = events[type];
-
-    if (typeof evlistener === 'function') {
-      return 1;
-    } else if (evlistener !== undefined) {
-      return evlistener.length;
-    }
-  }
-
-  return 0;
-}
-
-EventEmitter.prototype.eventNames = function eventNames() {
-  return this._eventsCount > 0 ? ReflectOwnKeys(this._events) : [];
-};
-
-function arrayClone(arr, n) {
-  var copy = new Array(n);
-  for (var i = 0; i < n; ++i)
-    copy[i] = arr[i];
-  return copy;
-}
-
-function spliceOne(list, index) {
-  for (; index + 1 < list.length; index++)
-    list[index] = list[index + 1];
-  list.pop();
-}
-
-function unwrapListeners(arr) {
-  var ret = new Array(arr.length);
-  for (var i = 0; i < ret.length; ++i) {
-    ret[i] = arr[i].listener || arr[i];
-  }
-  return ret;
-}
-
-function once(emitter, name) {
-  return new Promise(function (resolve, reject) {
-    function errorListener(err) {
-      emitter.removeListener(name, resolver);
-      reject(err);
-    }
-
-    function resolver() {
-      if (typeof emitter.removeListener === 'function') {
-        emitter.removeListener('error', errorListener);
-      }
-      resolve([].slice.call(arguments));
-    };
-
-    eventTargetAgnosticAddListener(emitter, name, resolver, { once: true });
-    if (name !== 'error') {
-      addErrorHandlerIfEventEmitter(emitter, errorListener, { once: true });
-    }
-  });
-}
-
-function addErrorHandlerIfEventEmitter(emitter, handler, flags) {
-  if (typeof emitter.on === 'function') {
-    eventTargetAgnosticAddListener(emitter, 'error', handler, flags);
-  }
-}
-
-function eventTargetAgnosticAddListener(emitter, name, listener, flags) {
-  if (typeof emitter.on === 'function') {
-    if (flags.once) {
-      emitter.once(name, listener);
-    } else {
-      emitter.on(name, listener);
-    }
-  } else if (typeof emitter.addEventListener === 'function') {
-    // EventTarget does not have `error` event semantics like Node
-    // EventEmitters, we do not listen for `error` events here.
-    emitter.addEventListener(name, function wrapListener(arg) {
-      // IE does not have builtin `{ once: true }` support so we
-      // have to do it manually.
-      if (flags.once) {
-        emitter.removeEventListener(name, wrapListener);
-      }
-      listener(arg);
-    });
-  } else {
-    throw new TypeError('The "emitter" argument must be of type EventEmitter. Received type ' + typeof emitter);
-  }
-}
-
-},{}],2:[function(require,module,exports){
-const ptn = require('parse-torrent-name');
-
-function getFormattedName(ptn) {
-  const { title, year } = ptn;
-  const yearStr = !!year ? ` (${year})` : '';
-  return `${title}${yearStr}`;
+  document.getElementById('status').textContent = text;
 }
 
 function formatName() {
-  let name = document.getElementById('input').value;
+  setStatus('');
+  const name = document.getElementById('input').value;
+  console.log('name: ', name)
   let result;
   if (name) {
-    console.log(`Formatting '${name}...`)
-    const extracted = ptn(name);
+    console.log(`Formatting '${name}'...`)
+    const extracted = ptt.parse(name);
+    console.log('Extracted: ', extracted);
     result = getFormattedName(extracted);
+    console.log('Formatted:', result);
+    setStatus('Formatted!');
   } else {
-    result = 'No input!';
+    setStatus('No input!', true);
   }
   document.getElementById('outputArea').textContent = result;
 }
 
-function copyToClipboard() {
-  const outputText = document.getElementById('outputArea').textContent;
+function formatNameFrom(nameToFormat) {
+  setStatus('');
+  console.log('nameToFormat: ', nameToFormat)
+  if (nameToFormat) {
+    console.log(`Formatting '${nameToFormat}'...`)
+    const extracted = ptt.parse(nameToFormat);
+    console.log('Extracted: ', extracted);
+    const result = getFormattedName(extracted);
+    console.log('Formatted:', result);
+    document.getElementById('outputArea').textContent = result;
+    setStatus('Formatted!');
+    // document.getElementById('goButton').click();
+    // copyToClipboard(result);
+  } else {
+    setStatus('No name provided! (formatNameFrom)', true);
+  }
+}
 
+function copyToClipboard() {
+  const outputText = getOutput();
   if (outputText) {
-    navigator.clipboard.writeText(outputText).then(function () {
+    navigator.clipboard.writeText(outputText).then(() => {
       console.log(`Copied: '${outputText}'`);
-    }).catch(function (error) {
+      setStatus('Copied to clipboard!');
+    }).catch((error) => {
       console.error('Could not copy text: ', error);
+      setStatus('Not able to copy to clipboard!', true);
     });
   } else {
     console.log(`No output to copy?!`);
   }
 }
 
+function readClipboard() {
+  let name;
+  navigator.clipboard.readText().then((text) => {
+    console.log(`Pasted: '${text}'`);
+    document.getElementById('input').value = text;
+    setStatus('Pasted from clipboard!');
+    formatName();
+  }).catch(function (error) {
+    console.error('Could not paste text: ', error);
+    setStatus('Error pasting from clipboard!!', true);
+  });
+}
+
 document.getElementById('goButton').addEventListener('click', formatName);
 document.getElementById('copyButton').addEventListener('click', copyToClipboard);
-},{"parse-torrent-name":4}],3:[function(require,module,exports){
-'use strict';
+document.getElementById('pasteButton').addEventListener('click', readClipboard);
+},{"parse-torrent-title":2}],2:[function(require,module,exports){
+const Parser = require("./src/parser").Parser;
+const handlers = require("./src/handlers");
 
-var EventEmitter = require('events').EventEmitter;
+const defaultParser = new Parser();
 
-var Core = function() {
-  EventEmitter.call(this);
+handlers.addDefaults(defaultParser);
 
-  var parts;
+exports.addDefaults = handlers.addDefaults;
+exports.addHandler = (handlerName, handler, options) => defaultParser.addHandler(handlerName, handler, options);
+exports.parse = title => defaultParser.parse(title);
+exports.Parser = Parser;
 
-  this.getParts = function() {
-    return parts;
-  };
+},{"./src/handlers":3,"./src/parser":4}],3:[function(require,module,exports){
+exports.addDefaults = /** @type Parser */ parser => {
 
-  this.on('setup', function () {
-    parts = {};
-  });
+    // Year
+    parser.addHandler("year", /(?!^)[([]?((?:19[0-9]|20[012])[0-9])[)\]]?/, { type: "integer" });
 
-  this.on('part', function (part) {
-    parts[part.name] = part.clean;
-  });
-};
+    // Resolution
+    parser.addHandler("resolution", /([0-9]{3,4}[pi])/i, { type: "lowercase" });
+    parser.addHandler("resolution", /(4k)/i, { type: "lowercase" });
 
-Core.prototype = Object.create(EventEmitter.prototype);
-Core.prototype.constructor = EventEmitter;
+    // Extended
+    parser.addHandler("extended", /EXTENDED/, { type: "boolean" });
 
-Core.prototype.exec = function(name) {
-  this.emit('setup', {
-    name: name
-  });
-  this.emit('start');
-  this.emit('end');
+    // Convert
+    parser.addHandler("convert", /CONVERT/, { type: "boolean" });
 
-  return this.getParts();
-};
+    // Hardcoded
+    parser.addHandler("hardcoded", /HC|HARDCODED/, { type: "boolean" });
 
-module.exports = new Core();
+    // Proper
+    parser.addHandler("proper", /(?:REAL.)?PROPER/, { type: "boolean" });
 
-},{"events":1}],4:[function(require,module,exports){
-'use strict';
+    // Repack
+    parser.addHandler("repack", /REPACK|RERIP/, { type: "boolean" });
 
-require('./parts/common');
-require('./parts/title');
-require('./parts/excess');
+    // Retail
+    parser.addHandler("retail", /\bRetail\b/i, { type: "boolean" });
 
-module.exports = function(name) {
-  return require('./core').exec(name);
-};
+    // Remastered
+    parser.addHandler("remastered", /\bRemaster(?:ed)?\b/i, { type: "boolean" });
 
-},{"./core":3,"./parts/common":5,"./parts/excess":6,"./parts/title":7}],5:[function(require,module,exports){
-'use strict';
+    // Unrated
+    parser.addHandler("unrated", /\bunrated|uncensored\b/i, { type: "boolean" });
 
-var core = require('../core');
+    // Region
+    parser.addHandler("region", /R[0-9]/);
 
-/**
- * Pattern should contain either none or two capturing groups.
- * In case of two groups - 1st is raw, 2nd is clean.
- */
-var patterns = {
-  season: /([Ss]?([0-9]{1,2}))[Eex]/,
-  episode: /([Eex]([0-9]{2})(?:[^0-9]|$))/,
-  year: /([\[\(]?((?:19[0-9]|20[01])[0-9])[\]\)]?)/,
-  resolution: /(([0-9]{3,4}p))[^M]/,
-  quality: /(?:PPV\.)?[HP]DTV|(?:HD)?CAM|B[rR]Rip|TS|(?:PPV )?WEB-?DL(?: DVDRip)?|H[dD]Rip|DVDRip|DVDRiP|DVDRIP|CamRip|W[EB]B[rR]ip|[Bb]lu[Rr]ay|DvDScr|hdtv/,
-  codec: /xvid|x264|h\.?264/i,
-  audio: /MP3|DD5\.?1|Dual[\- ]Audio|LiNE|DTS|AAC(?:\.?2\.0)?|AC3(?:\.5\.1)?/,
-  group: /(- ?([^-]+(?:-={[^-]+-?$)?))$/,
-  region: /R[0-9]/,
-  extended: /EXTENDED/,
-  hardcoded: /HC/,
-  proper: /PROPER/,
-  repack: /REPACK/,
-  container: /MKV|AVI/,
-  widescreen: /WS/,
-  website: /^(\[ ?([^\]]+?) ?\])/,
-  language: /rus\.eng/,
-  garbage: /1400Mb|3rd Nov| ((Rip))/
-};
-var types = {
-  season: 'integer',
-  episode: 'integer',
-  year: 'integer',
-  extended: 'boolean',
-  hardcoded: 'boolean',
-  proper: 'boolean',
-  repack: 'boolean',
-  widescreen: 'boolean'
-};
-var torrent;
+    // Container
+    parser.addHandler("container", /\b(MKV|AVI|MP4)\b/i, { type: "lowercase" });
 
-core.on('setup', function (data) {
-  torrent = data;
-});
+    // Source
+    parser.addHandler("source", /\b(?:HD-?)?CAM\b/, { type: "lowercase" });
+    parser.addHandler("source", /\b(?:HD-?)?T(?:ELE)?S(?:YNC)?\b/i, { value: "telesync" });
+    parser.addHandler("source", /\bHD-?Rip\b/i, { type: "lowercase" });
+    parser.addHandler("source", /\bBRRip\b/i, { type: "lowercase" });
+    parser.addHandler("source", /\bBDRip\b/i, { type: "lowercase" });
+    parser.addHandler("source", /\bDVDRip\b/i, { type: "lowercase" });
+    parser.addHandler("source", /\bDVD(?:R[0-9])?\b/i, { value: "dvd" });
+    parser.addHandler("source", /\bDVDscr\b/i, { type: "lowercase" });
+    parser.addHandler("source", /\b(?:HD-?)?TVRip\b/i, { type: "lowercase" });
+    parser.addHandler("source", /\bTC\b/, { type: "lowercase" });
+    parser.addHandler("source", /\bPPVRip\b/i, { type: "lowercase" });
+    parser.addHandler("source", /\bR5\b/i, { type: "lowercase" });
+    parser.addHandler("source", /\bVHSSCR\b/i, { type: "lowercase" });
+    parser.addHandler("source", /\bBluray\b/i, { type: "lowercase" });
+    parser.addHandler("source", /\bWEB-?DL\b/i, { type: "lowercase" });
+    parser.addHandler("source", /\bWEB-?Rip\b/i, { type: "lowercase" });
+    parser.addHandler("source", /\b(?:DL|WEB|BD|BR)MUX\b/i, { type: "lowercase" });
+    parser.addHandler("source", /\b(DivX|XviD)\b/, { type: "lowercase" });
+    parser.addHandler("source", /HDTV/i, { type: "lowercase" });
 
-core.on('start', function() {
-  var key, match, index, clean, part;
-
-  for(key in patterns) {
-    if(patterns.hasOwnProperty(key)) {
-      if(!(match = torrent.name.match(patterns[key]))) {
-        continue;
-      }
-
-      index = {
-        raw:   match[1] ? 1 : 0,
-        clean: match[1] ? 2 : 0
-      };
-
-      if(types[key] && types[key] === 'boolean') {
-        clean = true;
-      }
-      else {
-        clean = match[index.clean];
-
-        if(types[key] && types[key] === 'integer') {
-          clean = parseInt(clean, 10);
+    // Codec
+    parser.addHandler("codec", /dvix|mpeg2|divx|xvid|[xh][-. ]?26[45]|avc|hevc/i, { type: "lowercase" });
+    parser.addHandler("codec", ({ result }) => {
+        if (result.codec) {
+            result.codec = result.codec.replace(/[ .-]/, "");
         }
-      }
-
-      if(key === 'group') {
-        if(clean.match(patterns.codec) || clean.match(patterns.quality)) {
-          continue;
-        }
-
-        if(clean.match(/[^ ]+ [^ ]+ .+/)) {
-          key = 'episodeName';
-        }
-      }
-
-      part = {
-        name: key,
-        match: match,
-        raw: match[index.raw],
-        clean: clean
-      };
-
-      if(key === 'episode') {
-        core.emit('map', torrent.name.replace(part.raw, '{episode}'));
-      }
-
-      core.emit('part', part);
-    }
-  }
-
-  core.emit('common');
-});
-
-core.on('late', function (part) {
-  if(part.name === 'group') {
-    core.emit('part', part);
-  }
-  else if(part.name === 'episodeName') {
-    part.clean = part.clean.replace(/[\._]/g, ' ');
-    part.clean = part.clean.replace(/_+$/, '').trim();
-    core.emit('part', part);
-  }
-});
-
-},{"../core":3}],6:[function(require,module,exports){
-'use strict';
-
-var core = require('../core');
-
-var torrent, raw, groupRaw;
-var escapeRegex = function(string) {
-  return string.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&');
-};
-
-core.on('setup', function (data) {
-  torrent = data;
-  raw = torrent.name;
-  groupRaw = '';
-});
-
-core.on('part', function (part) {
-  if(part.name === 'excess') {
-    return;
-  }
-  else if(part.name === 'group') {
-    groupRaw = part.raw;
-  }
-
-  // remove known parts from the excess
-  raw = raw.replace(part.raw, '');
-});
-
-core.on('map', function (map) {
-  torrent.map = map;
-});
-
-core.on('end', function () {
-  var clean, groupPattern, episodeNamePattern;
-
-  // clean up excess
-  clean = raw.replace(/(^[-\. ]+)|([-\. ]+$)/g, '');
-  clean = clean.replace(/[\(\)\/]/g, ' ');
-  clean = clean.split(/\.\.+| +/).filter(Boolean);
-
-  if(clean.length !== 0) {
-    groupPattern = escapeRegex(clean[clean.length - 1] + groupRaw) + '$';
-
-    if(torrent.name.match(new RegExp(groupPattern))) {
-      core.emit('late', {
-        name: 'group',
-        clean: clean.pop() + groupRaw
-      });
-    }
-
-    if(torrent.map && clean[0]) {
-      episodeNamePattern = '{episode}' + escapeRegex(clean[0].replace(/_+$/, ''));
-
-      if(torrent.map.match(new RegExp(episodeNamePattern))) {
-        core.emit('late', {
-          name: 'episodeName',
-          clean: clean.shift()
-        });
-      }
-    }
-  }
-
-  if(clean.length !== 0) {
-    core.emit('part', {
-      name: 'excess',
-      raw: raw,
-      clean: clean.length === 1 ? clean[0] : clean
     });
-  }
-});
 
-},{"../core":3}],7:[function(require,module,exports){
-'use strict';
+    // Audio
+    parser.addHandler("audio", /MD|MP3|mp3|FLAC|Atmos|DTS(?:-HD)?|TrueHD/, { type: "lowercase" });
+    parser.addHandler("audio", /Dual[- ]Audio/i, { type: "lowercase" });
+    parser.addHandler("audio", /AC-?3(?:\.5\.1)?/i, { value: "ac3" });
+    parser.addHandler("audio", /DD5[. ]?1/i, { value: "dd5.1" });
+    parser.addHandler("audio", /AAC(?:[. ]?2[. ]0)?/, { value: "aac" });
 
-var core = require('../core');
+    // Group
+    parser.addHandler("group", /- ?([^\-. ]+)$/);
 
-require('./common');
+    // Season
+    parser.addHandler("season", /([0-9]{1,2})xall/i, { type: "integer" });
+    parser.addHandler("season", /S([0-9]{1,2}) ?E[0-9]{1,2}/i, { type: "integer" });
+    parser.addHandler("season", /([0-9]{1,2})x[0-9]{1,2}/, { type: "integer" });
+    parser.addHandler("season", /(?:Saison|Season)[. _-]?([0-9]{1,2})/i, { type: "integer" });
 
-var torrent, start, end, raw;
+    // Episode
+    parser.addHandler("episode", /S[0-9]{1,2} ?E([0-9]{1,2})/i, { type: "integer" });
+    parser.addHandler("episode", /[0-9]{1,2}x([0-9]{1,2})/, { type: "integer" });
+    parser.addHandler("episode", /[ée]p(?:isode)?[. _-]?([0-9]{1,3})/i, { type: "integer" });
 
-core.on('setup', function (data) {
-  torrent = data;
-  start = 0;
-  end = undefined;
-  raw = undefined;
-});
+    // Language
+    parser.addHandler("language", /\bRUS\b/i, { type: "lowercase" });
+    parser.addHandler("language", /\bNL\b/, { type: "lowercase" });
+    parser.addHandler("language", /\bFLEMISH\b/, { type: "lowercase" });
+    parser.addHandler("language", /\bGERMAN\b/, { type: "lowercase" });
+    parser.addHandler("language", /\bDUBBED\b/, { type: "lowercase" });
+    parser.addHandler("language", /\b(ITA(?:LIAN)?|iTALiAN)\b/, { value: "ita" });
+    parser.addHandler("language", /\bFR(?:ENCH)?\b/, { type: "lowercase" });
+    parser.addHandler("language", /\bTruefrench|VF(?:[FI])\b/i, { type: "lowercase" });
+    parser.addHandler("language", /\bVOST(?:(?:F(?:R)?)|A)?|SUBFRENCH\b/i, { type: "lowercase" });
+    parser.addHandler("language", /\bMULTi(?:Lang|-VF2)?\b/i, { type: "lowercase" });
+};
 
-core.on('part', function (part) {
-  if(!part.match) {
-    return;
-  }
+},{}],4:[function(require,module,exports){
+function extendOptions(options) {
+    options = options || {};
 
-  if(part.match.index === 0) {
-    start = part.match[0].length;
+    const defaultOptions = {
+        skipIfAlreadyFound: true,
+        type: "string",
+    };
 
-    return;
-  }
+    options.skipIfAlreadyFound = options.skipIfAlreadyFound || defaultOptions.skipIfAlreadyFound;
+    options.type = options.type || defaultOptions.type;
 
-  if(!end || part.match.index < end) {
-    end = part.match.index;
-  }
-});
+    return options;
+}
 
-core.on('common', function () {
-  var raw = end ? torrent.name.substr(start, end - start).split('(')[0] : torrent.name;
-  var clean = raw;
+function createHandlerFromRegExp(name, regExp, options) {
+    let transformer;
 
-  // clean up title
-  clean = raw.replace(/^ -/, '');
+    if (!options.type) {
+        transformer = input => input;
+    } else if (options.type.toLowerCase() === "lowercase") {
+        transformer = input => input.toLowerCase();
+    } else if (options.type.toLowerCase().slice(0, 4) === "bool") {
+        transformer = () => true;
+    } else if (options.type.toLowerCase().slice(0, 3) === "int") {
+        transformer = input => parseInt(input, 10);
+    } else {
+        transformer = input => input;
+    }
 
-  if(clean.indexOf(' ') === -1 && clean.indexOf('.') !== -1) {
-    clean = clean.replace(/\./g, ' ');
-  }
+    function handler({ title, result }) {
+        if (result[name] && options.skipIfAlreadyFound) {
+            return null;
+        }
 
-  clean = clean.replace(/_/g, ' ');
-  clean = clean.replace(/([\(_]|- )$/, '').trim();
+        const match = title.match(regExp);
+        const [rawMatch, cleanMatch] = match || [];
 
-  core.emit('part', {
-    name: 'title',
-    raw: raw,
-    clean: clean
-  });
-});
+        if (rawMatch) {
+            result[name] = options.value || transformer(cleanMatch || rawMatch);
+            return match.index;
+        }
 
-},{"../core":3,"./common":5}]},{},[2]);
+        return null;
+    }
+
+    handler.handlerName = name;
+
+    return handler;
+}
+
+function cleanTitle(rawTitle) {
+    let cleanedTitle = rawTitle;
+
+    if (cleanedTitle.indexOf(" ") === -1 && cleanedTitle.indexOf(".") !== -1) {
+        cleanedTitle = cleanedTitle.replace(/\./g, " ");
+    }
+
+    cleanedTitle = cleanedTitle.replace(/_/g, " ");
+    cleanedTitle = cleanedTitle.replace(/([(_]|- )$/, "").trim();
+
+    return cleanedTitle;
+}
+
+class Parser {
+
+    constructor() {
+        this.handlers = [];
+    }
+
+    addHandler(handlerName, handler, options) {
+        if (typeof handler === "undefined" && typeof handlerName === "function") {
+
+            // If no name is provided and a function handler is directly given
+            handler = handlerName;
+            handler.handlerName = "unknown";
+
+        } else if (typeof handlerName === "string" && handler instanceof RegExp) {
+
+            // If the handler provided is a regular expression
+            options = extendOptions(options);
+            handler = createHandlerFromRegExp(handlerName, handler, options);
+
+        } else if (typeof handler === "function") {
+
+            // If the handler is a function
+            handler.handlerName = handlerName;
+
+        } else {
+
+            // If the handler is neither a function nor a regular expression, throw an error
+            throw new Error(`Handler for ${handlerName} should be a RegExp or a function. Got: ${typeof handler}`);
+
+        }
+
+        this.handlers.push(handler);
+    }
+
+    parse(title) {
+        const result = {};
+        let endOfTitle = title.length;
+
+        for (const handler of this.handlers) {
+            const matchIndex = handler({ title, result });
+
+            if (matchIndex && matchIndex < endOfTitle) {
+                endOfTitle = matchIndex;
+            }
+        }
+
+        result.title = cleanTitle(title.slice(0, endOfTitle));
+
+        return result;
+    }
+}
+
+exports.Parser = Parser;
+
+},{}]},{},[1]);
