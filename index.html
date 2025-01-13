@@ -14,10 +14,10 @@
       padding: 20px;
     }
 
-    h1 {
+    h2 {
       text-align: center;
       margin-top: 0;
-      color: rgb(27, 28, 65);
+      color: rgb(0, 79, 164);
     }
 
     label,
@@ -25,8 +25,9 @@
     button {
       margin: 10px 0;
       display: block;
-      height: 25px;
-      color: rgb(27, 28, 65);
+      height: 30px;
+      width: min-content;
+      color: rgb(54, 71, 113);
     }
 
     input,
@@ -37,11 +38,11 @@
 
     button {
       background-color: #dbedff;
-      box-shadow: 0 2px rgb(27, 28, 65);
+      box-shadow: 0 2px #669cd2;
     }
 
     button:hover {
-      background-color: #9ecfff;
+      background-color: #fdffea;
     }
 
     button:active {
@@ -71,19 +72,27 @@
     }
 
     #pasteButton,
-    #copyButton {
-      width: 200px;
+    #copyButton,
+    #runFromClipboardButton {
+      width: 220px;
     }
 
+    button:hover {
+      font-weight: bold;
+    }
 
     #clipboardButtons {
-      display: ruby-text;
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: center;
+      gap: 30px;
     }
 
     #container {
       margin: auto auto;
       padding: 25px;
-      background-color: #9ecfff;
+      background-color: #abd5ff;
       border-radius: 12px;
     }
 
@@ -91,9 +100,10 @@
       height: 200px;
       border: 1px solid gray;
       border-radius: 12px;
-      background-color: #d1e8fe;
+      background-color: #e5f3ff;
       padding: 10px;
       width: calc(100% - 20px);
+      margin-top: 10px;
     }
 
     #inputContainer {
@@ -104,27 +114,30 @@
     }
 
     #status {
-      height: 20px;
+      margin-top: 20px;
+      height: 100%;
       text-align: center;
+      font-size: small;
     }
   </style>
 </head>
 
 <body>
   <div id="container">
-    <h1>Name Formatter</h1>
-    <div id="inputContainer">
-      <label id="inputLabel" for="input">Input:</label>
-      <input type="text" id="input" name="input">
-      <button id="goButton">Go</button>
-    </div>
-    <div id="outputArea"></div>
-    <div id="clipboardButtons">
-      <button id="copyButton">Copy to clipboard</button>
-      <button id="pasteButton">Run from clipboard</button>
-    </div>
-    <div id="status"></div>
+    <h2>Name Formatter</h1>
+      <div id="inputContainer">
+        <label id="inputLabel" for="input">Input:</label>
+        <input type="text" id="input" name="input">
+        <button id="goButton">Go</button>
+      </div>
+      <div id="outputArea"></div>
+      <div id="clipboardButtons">
+        <button id="pasteButton">Paste from clipboard</button>
+        <button id="copyButton">Copy to clipboard</button>
+        <button id="runFromClipboardButton">Run from clipboard</button>
+      </div>
   </div>
+  <div id="status"></div>
   <script src="bundle.js"></script>
 </body>
 
