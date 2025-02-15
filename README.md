@@ -1,6 +1,7 @@
 # Media name extractor
 
-A web utility to rename video files into a more 'friendly' name.
+A web utility to rename video files into a more 'friendly' name.\
+Useful when sharing or downloading video torrents.
 
 Simply set the input and press Go.
 
@@ -55,3 +56,7 @@ Credit goes to [Clément Escolano](https://github.com/clement-escolano)'s [parse
     margin: 0 auto;
   }
 </style>
+
+## Disclaimer
+
+I don't condone downloading nor sharing illegal content of any kind. This tool was developed to assist me in renaming my personal and legal video conversions. 
