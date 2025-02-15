@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Name Formatter</title>
+  <title>Media Name Extractor</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <style>
     body {
@@ -119,16 +119,34 @@
       text-align: center;
       font-size: small;
     }
+
+    #options {
+      display: inline-flex;
+      white-space: nowrap;
+      align-items: center;
+      height: 30px;
+    }
+
+    #options label {
+      align-content: center;
+      margin-left: 5px;
+      margin-right: 15px;
+      font-size: small;
+    }
   </style>
 </head>
 
 <body>
   <div id="container">
-    <h2>Name Formatter</h1>
+    <h2>Media Name Extractor</h1>
       <div id="inputContainer">
         <label id="inputLabel" for="input">Input:</label>
         <input type="text" id="input" name="input">
         <button id="goButton">Go</button>
+      </div>
+      <div id="options">
+        <input type="checkbox" id="addYear" checked /><label for="addYear">Include year</label>
+        <input type="checkbox" id="keepFileExt" /><label for="keepFileExt">Keep file extension</label>
       </div>
       <div id="outputArea"></div>
       <div id="clipboardButtons">

@@ -1,11 +1,14 @@
-// const ptn = require('parse-torrent-name');
-// const ptn = require('torrent-name-parser');
 const ptt = require("parse-torrent-title");
 
 function getFormattedName(torrentInfo) {
   const { title, year } = torrentInfo;
-  const yearStr = !!year ? `(${year})` : '';
-  return `${title} ${yearStr}`;
+  let result = title;
+  const showDate = document.getElementById('addYear').checked;
+  if (showDate) {
+    const yearStr = !!year ? ` (${year})` : '';
+    result += yearStr;
+  }
+  return result;
 }
 
 function getOutput() {
@@ -31,19 +34,20 @@ function setStatus(status, error) {
 
 function formatName(logStatus = true) {
   if (logStatus) setStatus('')
-  const name = document.getElementById('input').value;
-  console.log('name: ', name)
+  const name = document.getElementById('input').value + '';
   let result;
   if (name) {
-    console.log(`Formatting '${name}'...`)
     const extracted = ptt.parse(name);
-    console.log('Extracted: ', extracted);
     result = getFormattedName(extracted);
-    console.log('Formatted:', result);
+    const keepFileExt = document.getElementById('keepFileExt').checked;
+    if (keepFileExt && name.includes('.')) {
+      result += '.' + name.split('.').pop();
+    }
     if (logStatus) setStatus('Formatted!');
   } else {
     setStatus('No input!', true);
   }
+
   document.getElementById('outputArea').textContent = result;
 }
 
@@ -52,14 +56,11 @@ function copyToClipboard(logStatus = true) {
   const outputText = getOutput();
   if (outputText) {
     navigator.clipboard.writeText(outputText).then(() => {
-      console.log(`Copied: '${outputText}'`);
       if (logStatus) setStatus('Copied to clipboard!');
     }).catch((error) => {
-      console.error('Could not copy text: ', error);
       setStatus('Not able to copy to clipboard!', true);
     });
   } else {
-    console.log(`No output to copy?!`);
     setStatus('No output to copy!', true);
   }
 }
@@ -75,7 +76,6 @@ function pasteFromClipboard() {
     status.push('Pasted from clipboard!');
     setStatus(status);
   }).catch(function (error) {
-    console.error('Could not paste text: ', error);
     setStatus('Error pasting from clipboard!!', true);
   });
 }
@@ -84,8 +84,6 @@ function runFromClipboard() {
   setStatus('')
   navigator.clipboard.readText().then((text) => {
     const status = [];
-    console.log(`Pasted: '${text}'`);
-
     document.getElementById('input').value = text;
     status.push('Pasted from clipboard!');
     setStatus(status);
@@ -98,7 +96,6 @@ function runFromClipboard() {
     status.push('Copied to clipboard!');
     setStatus(status);
   }).catch(function (error) {
-    console.error('Could not run from clipboard: ', error);
     setStatus('Error when using text from clipboard!!', true);
   });
 }
