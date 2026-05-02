@@ -5,10 +5,11 @@ A web utility to rename video files into a more 'friendly' name. Useful when con
 Simply set the input and press Go.
 
 
-## Screenshot
+## Screenshots
 
 <p align="center" width="100%">
-  <img alt="screenshot" title="screenshot" src="image-1.png" width="500" />
+  <img alt="dark mode" title="dark mode" src="image-dark.png" width="500" />
+  <img alt="light mode" title="light mode" src="image-light.png" width="500" />
 </p>
 
 ## Example
@@ -44,9 +45,19 @@ Copies output box content to clipboard.
 **Run from clipboard**:\
 Fills input field with text from clipboard and runs conversion. It also copies output to the clipboard.
 
+## Shortcuts
+
+**Ctrl+V / ⌘V** anywhere on the page (outside the input field) instantly runs the full pipeline: pastes clipboard text, formats, and copies the result back to the clipboard.
+
+**Enter** while focused in the input field triggers Go.
+
+## Theme
+
+Toggle between **dark** and **light** mode using the button in the top-right of the card. Preference is persisted to `localStorage`.
+
 ## Credits
 Credit goes to [Clément Escolano](https://github.com/clement-escolano)'s [parse-torrent-title](https://github.com/clement-escolano/parse-torrent-title) fantastic tool, developed in Javascript. Check him out.
 
 ## Disclaimer
 
-I don't condone downloading nor sharing illegal content of any kind. This tool was developed to assist me in renaming my personal and legal video conversions. 
+I don't condone downloading nor sharing illegal content of any kind. This tool was developed to assist me in renaming my personal and legal video conversions.
