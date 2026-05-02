@@ -17,7 +17,7 @@ function getOutput() {
 
 function setStatus(status, error) {
   const statusElement = document.getElementById('status');
-  statusElement.style.color = error ? 'red' : 'cornflowerblue';
+  statusElement.className = error ? 'error' : '';
 
   if (typeof (status) === "string") {
     statusElement.textContent = status;
@@ -104,3 +104,52 @@ document.getElementById('goButton').addEventListener('click', formatName);
 document.getElementById('copyButton').addEventListener('click', copyToClipboard);
 document.getElementById('pasteButton').addEventListener('click', pasteFromClipboard);
 document.getElementById('runFromClipboardButton').addEventListener('click', runFromClipboard);
+
+document.getElementById('input').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') formatName();
+});
+
+document.addEventListener('paste', function (e) {
+  if (document.activeElement === document.getElementById('input')) return;
+  const text = e.clipboardData.getData('text');
+  if (!text) { setStatus('No text in clipboard?!', true); return; }
+  const status = [];
+  document.getElementById('input').value = text;
+  status.push('Pasted from clipboard!');
+  setStatus(status);
+  formatName(false);
+  status.push('Formatted name!');
+  setStatus(status);
+  copyToClipboard(false);
+  status.push('Copied to clipboard!');
+  setStatus(status);
+});
+
+(function initTheme() {
+  const root = document.documentElement;
+  const toggle = document.getElementById('themeToggle');
+  const icon = document.getElementById('themeIcon');
+  const label = document.getElementById('themeLabel');
+
+  const sunPath = 'M12 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm0 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm8-8a1 1 0 110 2h-1a1 1 0 110-2h1zM5 12a1 1 0 110 2H4a1 1 0 110-2h1zm11.95-6.364a1 1 0 010 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM8.172 15.95a1 1 0 010 1.414l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zm9.192 1.414a1 1 0 01-1.414 0l-.707-.707a1 1 0 011.414-1.414l.707.707a1 1 0 010 1.414zM8.172 8.05a1 1 0 01-1.414 0l-.707-.707A1 1 0 017.465 5.93l.707.707a1 1 0 010 1.414zM12 7a5 5 0 100 10A5 5 0 0012 7z';
+  const moonPath = 'M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z';
+
+  function applyTheme(theme) {
+    root.setAttribute('data-theme', theme);
+    if (theme === 'dark') {
+      icon.innerHTML = '<path d="' + sunPath + '"/>';
+      label.textContent = 'Light mode';
+    } else {
+      icon.innerHTML = '<path d="' + moonPath + '"/>';
+      label.textContent = 'Dark mode';
+    }
+    localStorage.setItem('theme', theme);
+  }
+
+  const saved = localStorage.getItem('theme') || 'dark';
+  applyTheme(saved);
+
+  toggle.addEventListener('click', function () {
+    applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+})();
