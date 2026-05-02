@@ -8,12 +8,12 @@ Simply set the input and press Go.
 ## Screenshots
 
 <p align="center" width="100%">
-  <img alt="dark mode" title="dark mode" src="image-dark.png" width="500" />
-  <img alt="light mode" title="light mode" src="image-light.png" width="500" />
+  <img alt="dark mode" title="dark mode" src="dark.png" width="500" />
+  <img alt="light mode" title="light mode" src="light.png" width="500" />
 </p>
 
 ## Example
-> Constantine.2005.BluRay.1080p.REMUX.VC-1.TrueHD.DTS-HD.MA.5.1-LEGi0N.mkv
+> Constantine.2005.1080p.Atmos.5.1.H.264.bluray-rip.mkv
 
 **Will rename to:**
 
