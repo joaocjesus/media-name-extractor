@@ -179,7 +179,7 @@
     }
 
     #goButton {
-      height: 46px;
+      height: 42px;
       padding: 0 22px;
       background: var(--btn-primary-bg);
       border: none;
@@ -204,9 +204,53 @@
 
     .options {
       display: flex;
-      gap: 20px;
+      align-items: flex-start;
+      gap: 8px;
       margin-bottom: 28px;
-      justify-content: flex-end;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .options-dropdown {
+      position: relative;
+    }
+
+    .options-button {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .options-button svg {
+      width: 13px;
+      height: 13px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: transform 0.15s;
+    }
+
+    .options-button[aria-expanded="true"] svg {
+      transform: rotate(180deg);
+    }
+
+    .options-menu {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 8px);
+      z-index: 10;
+      min-width: 220px;
+      padding: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .options-menu[hidden] {
+      display: none;
     }
 
     .option-label {
@@ -221,8 +265,17 @@
       transition: color 0.15s;
     }
 
+    .options-menu .option-label {
+      padding: 8px;
+      border-radius: 6px;
+    }
+
     .option-label:hover {
       color: var(--text-primary);
+    }
+
+    .options-menu .option-label:hover {
+      background: var(--btn-secondary-hover);
     }
 
     .option-label input[type="checkbox"] {
@@ -377,15 +430,29 @@
     </div>
 
     <div class="options">
-      <button class="btn-secondary" id="pasteButton" style="margin-right: auto;">Paste from clipboard</button>
-      <label class="option-label">
-        <input type="checkbox" id="addYear" checked>
-        Include year
-      </label>
-      <label class="option-label">
-        <input type="checkbox" id="keepFileExt">
-        Keep file extension
-      </label>
+      <button class="btn-secondary" id="pasteButton">Paste from clipboard</button>
+      <div class="options-dropdown">
+        <button class="btn-secondary options-button" id="optionsButton" aria-expanded="false" aria-controls="optionsMenu">
+          Options
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </button>
+        <div class="options-menu" id="optionsMenu" hidden>
+          <label class="option-label">
+            <input type="checkbox" id="formatTitle" checked>
+            Format title
+          </label>
+          <label class="option-label">
+            <input type="checkbox" id="addYear" checked>
+            Include year
+          </label>
+          <label class="option-label">
+            <input type="checkbox" id="keepFileExt">
+            Keep file extension
+          </label>
+        </div>
+      </div>
     </div>
 
     <div class="result-section">

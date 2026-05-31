@@ -29,6 +29,11 @@ Simply set the input and press Go.
 
 ## Options
 
+Open **Options** to configure output formatting.
+
+**Format title**:\
+Converts extracted titles to PascalCase. Enabled by default.
+
 **Include year**:\
 Includes release year (in brackets)
 

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "browserify mediaNameExtract.js -o bundle.js",
+    "build": "esbuild mediaNameExtract.js --bundle --outfile=bundle.js",
     "start": "open index.html"
   },
   "author": "",
@@ -12,5 +12,8 @@
   "dependencies": {
     "install": "^0.13.0",
     "parse-torrent-title": "^1.4.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0"
   }
 }
