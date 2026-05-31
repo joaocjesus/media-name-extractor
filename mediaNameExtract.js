@@ -1,8 +1,15 @@
 const ptt = require("parse-torrent-title");
 
+function toPascalCaseTitle(title) {
+  return (title || '').toLowerCase().replace(/[a-z0-9]+(?:'[a-z0-9]+)?/gi, word => (
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ));
+}
+
 function getFormattedName(torrentInfo) {
   const { title, year } = torrentInfo;
-  let result = title;
+  const shouldFormatTitle = document.getElementById('formatTitle').checked;
+  let result = shouldFormatTitle ? toPascalCaseTitle(title) : title;
   const showDate = document.getElementById('addYear').checked;
   if (showDate) {
     const yearStr = !!year ? ` (${year})` : '';
@@ -104,6 +111,33 @@ document.getElementById('goButton').addEventListener('click', formatName);
 document.getElementById('copyButton').addEventListener('click', copyToClipboard);
 document.getElementById('pasteButton').addEventListener('click', pasteFromClipboard);
 document.getElementById('runFromClipboardButton').addEventListener('click', runFromClipboard);
+
+const optionsButton = document.getElementById('optionsButton');
+const optionsMenu = document.getElementById('optionsMenu');
+
+function closeOptionsMenu() {
+  optionsButton.setAttribute('aria-expanded', 'false');
+  optionsMenu.hidden = true;
+}
+
+optionsButton.addEventListener('click', function () {
+  const isOpen = optionsButton.getAttribute('aria-expanded') === 'true';
+  optionsButton.setAttribute('aria-expanded', !isOpen);
+  optionsMenu.hidden = isOpen;
+});
+
+document.addEventListener('click', function (e) {
+  if (!optionsMenu.hidden && !e.target.closest('.options-dropdown')) {
+    closeOptionsMenu();
+  }
+});
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && !optionsMenu.hidden) {
+    closeOptionsMenu();
+    optionsButton.focus();
+  }
+});
 
 document.getElementById('input').addEventListener('keydown', function (e) {
   if (e.key === 'Enter') formatName();
